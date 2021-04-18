@@ -8,12 +8,18 @@ die "No perl found in searching folders.\n" if ($perlPath=~/no perl/);
 #%params=@ARGV;
 $cnfhome=`pwd`;chomp($cnfhome);
 $curhome=`./self_pwd.sh 1`;chomp($curhome);
-$pelhome=`./self_pwd.sh 0`;chomp($pelhome);
-$relhome="\$ENV{\"HOME\"}.";
+
+#$pelhome=`./self_pwd.sh 0`;chomp($pelhome);
+#$relhome="\$ENV{\"HOME\"}.";
+
+print "cnfhome is : ".$cnfhome."\n";
+print "curhome is : ".$curhome."\n";
+#print "pelhome is : ".$pelhome."\n";
 
 
 # ========== main program ================
 # AUCpreD.sh
+# me is : ".$cnfhome."\n";
 open fhRUN,"<".$cnfhome."/AUCpreD.sh";
 open fhRUNNEW,">".$cnfhome."/AUCpreD.sh.new";
 while(<fhRUN>){
@@ -188,7 +194,7 @@ open fhRUN,"<".$cnfhome."/util/SS8_Predict/bin/run_raptorx-ss8.pl";
 open fhRUNNEW,">".$cnfhome."/util/SS8_Predict/bin/run_raptorx-ss8.pl.new";
 while(<fhRUN>){
     if(/^\$raptorx=/){
-        print fhRUNNEW "\$raptorx=$relhome\"".$pelhome."\";\n";
+        print fhRUNNEW "\$raptorx=\"".$cnfhome."\";\n";
         next;
     }
     print fhRUNNEW "$_";
