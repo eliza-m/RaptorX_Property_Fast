@@ -123,14 +123,15 @@ if [ ! -f "$curdir/$a3m_file" ]
 then
 	echo "hhblits start with database $uniprot20"
 	HHSUITE=hhsuite
-	HHLIB=$HHSUITE/lib/hh
+	export HHLIB=$HHSUITE/install/lib/hh
 	if [ $coverage -eq -2 ]
 	then
 		echo "run HHblits with default parameter without -cov "
-		$HHSUITE/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o $relnam.hhr -oa3m $relnam.a3m -n $iteration
+		echo "HHblits is : "$(readlink -f $HHSUITE)
+		$HHSUITE/install/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o $relnam.hhr -oa3m $relnam.a3m -n $iteration
 	else
 		echo "run HHblits with -maxfilt 500000 -diff inf -id 99 -cov $coverage"
-		$HHSUITE/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o $relnam.hhr -oa3m $relnam.a3m -n $iteration -maxfilt 500000 -diff inf -id 99 -cov $coverage
+		$HHSUITE/install/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o $relnam.hhr -oa3m $relnam.a3m -n $iteration -maxfilt 500000 -diff inf -id 99 -cov $coverage
 	fi
 	mv $relnam.hhr $tmp_root
 	echo "hhblits done"
