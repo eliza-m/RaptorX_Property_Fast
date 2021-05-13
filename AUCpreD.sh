@@ -42,8 +42,10 @@ fi
 curdir="$(pwd)"
 
 # ----- main directory ---#
-util=bin
-RaptorX_HOME=~/GitBucket/RaptorX_Property_Fast
+RaptorX_HOME=/storage1/eliza/git/LRRpred_raptorpaths/LRRpredictor_v1/RaptorX_Property_Fast
+
+util=$RaptorX_HOME/bin
+
 #-> check directory
 if [ ! -f "$RaptorX_HOME/AUCpreD.sh" ]
 then
@@ -173,8 +175,9 @@ then
 fi
 
 # ----- pre process ------ #
-cd $RaptorX_HOME
-tmp=tmp"_"$relnam"_"$RANDOM
+cd $RaptorX_HOME/tmp/$relnam
+tmp=tmp"_"$relnam
+
 mkdir -p $tmp/
 rm -f $tmp/$relnam.seq
 if [ $has_fasta -eq 1 ]
@@ -245,7 +248,7 @@ do
 	# ------------ amionly mode ---------- #
 	else
 		# ----- generate predicted SSE and ACC ----- #
-		cd util/psisolvpred
+		cd $RaptorX_HOME/util/psisolvpred
 			./runxxxpred_single ../../$tmp/$relnam.seq 1> $relnam.ws1 2> $relnam.ws2
 			mv $relnam.solv $relnam.ss2 ../../$tmp
 			rm -f $relnam.ss $relnam.horiz $relnam.ws1 $relnam.ws2
@@ -270,7 +273,7 @@ do
 	outnam=$relnam.diso
 	if [ $amino_only -eq 0 ]
 	then
-		$util/DeepCNF_Pred -i $tmp/$relnam.feat_profile -w 5,5 -d 50,50 -s 3 -l 148 -m parameters/AUCpreD_profile_model > $tmp/$relnam.diso_profile 2> $tmp/$relnam.pred_log2
+		$util/DeepCNF_Pred -i $tmp/$relnam.feat_profile -w 5,5 -d 50,50 -s 3 -l 148 -m $RaptorX_HOME/parameters/AUCpreD_profile_model > $tmp/$relnam.diso_profile 2> $tmp/$relnam.pred_log2
 		OUT=$?
 		if [ $OUT -ne 0 ]
 		then
@@ -280,7 +283,7 @@ do
 		fi
 		outnam=$relnam.diso_profile
 	else
-		$util/DeepCNF_Pred -i $tmp/$relnam.feat_noprof -w 5,5 -d 50,50 -s 3 -l 87 -m parameters/AUCpreD_noprof_model > $tmp/$relnam.diso_noprof 2> $tmp/$relnam.pred_log2
+		$util/DeepCNF_Pred -i $tmp/$relnam.feat_noprof -w 5,5 -d 50,50 -s 3 -l 87 -m $RaptorX_HOME/parameters/AUCpreD_noprof_model > $tmp/$relnam.diso_noprof 2> $tmp/$relnam.pred_log2
 		OUT=$?
 		if [ $OUT -ne 0 ]
 		then

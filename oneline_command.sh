@@ -6,6 +6,7 @@ then
 	exit
 fi
 CurRoot="$(pwd)"
+WRITING_FOLDER=${CurRoot}/tmp/
 
 
 # ------- CPU number ------ #
@@ -28,22 +29,24 @@ relnam=${fulnam%.*}
 
 # ------- run ProtProp Server --------- #
 Server_Root=/storage1/eliza/git/LRRpred_raptorpaths/LRRpredictor_v1/RaptorX_Property_Fast
-cp $1 $Server_Root/$relnam.fasta
 
 # ---- check if TGT file exist ----- #
 has_TGT=0
 if [ -f "$relnam.tgt" ]
 then
 	has_TGT=1
-	cp $relnam.tgt $Server_Root/
+	cp $relnam.tgt ${WRITING_FOLDER}
 fi
 
 # ---- running ---------#
 cd $Server_Root
 	#-> 0. create 'tmp' folder
-	rm -rf tmp/$relnam
-	mkdir -p tmp/$relnam
-	tmp=TMP"_"$relnam"_"$RANDOM
+	rm -rf ${WRITING_FOLDER}/$relnam
+	mkdir -p ${WRITING_FOLDER}/$relnam
+	tmp=${WRITING_FOLDER}/$relnam/TMP"_"$relnam
+
+	cp $1 ${WRITING_FOLDER}/$relnam/$relnam.fasta
+
 	mkdir -p $tmp/
 	#------- start -------#
 	util=bin
@@ -57,8 +60,8 @@ cd $Server_Root
 			if [ $has_TGT -eq 0 ]
 			then
 				#--> Fast_TGT
-				echo "Running Fast_TGT to generate TGT file for sequence $relnam"
-				./Fast_TGT.sh -i $relnam.fasta -c $BindX_CPU -o $tmp 1> $tmp/$relnam.tgt_log1 2> $tmp/$relnam.tgt_log2
+				echo "Running Fast_TGT to generate TGT file for sequence ${WRITING_FOLDER}/$relnam/$relnam.fasta"
+				./Fast_TGT.sh -i ${WRITING_FOLDER}/$relnam/$relnam.fasta -c $BindX_CPU -o $tmp 1> $tmp/$relnam.tgt_log1 2> $tmp/$relnam.tgt_log1
 				OUT=$?
 				if [ $OUT -ne 0 ]
 				then
@@ -69,15 +72,19 @@ cd $Server_Root
 			else
 				mv $relnam.tgt $tmp/$relnam.tgt
 			fi
-			util/Verify_FASTA $relnam.fasta $tmp/$relnam.seq
-			cp $relnam.fasta $tmp/$relnam.fasta_raw
+			util/Verify_FASTA ${WRITING_FOLDER}/$relnam/$relnam.fasta $tmp/$relnam.seq
+			cp ${WRITING_FOLDER}/$relnam/$relnam.fasta $tmp/$relnam.fasta_raw
+
+
 			#-> 1.1 TGT Update
+
 			echo "Running TGT_Update to upgrade TGT file for sequence $relnam"
-			tmptmp=TMPTMP"_"$relnam"_"$RANDOM
+			tmptmp=${WRITING_FOLDER}/$relnam/TMPTMP"_"$relnam
 			mkdir -p $tmptmp
 			mkdir -p $tmp/update/
 			./TGT_Update -i $tmp/$relnam.tgt -o $tmp/update/$relnam.tgt -t $tmptmp
-			rm -r $tmptmp
+
+			#rm -r $tmptmp
 			#-> 2. generate SS3/SS8 file
 			#--> SS8
 			$util/DeepCNF_SS_Con -t $tmp/$relnam.tgt -s 0 > $tmp/$relnam.ss8
@@ -129,8 +136,8 @@ cd $Server_Root
 		else     #-> not use profile
 
 			#-> 1. generate feature file
-			util/Verify_FASTA $relnam.fasta $tmp/$relnam.seq
-			cp $relnam.fasta $tmp/$relnam.fasta_raw
+			util/Verify_FASTA ${WRITING_FOLDER}/$relnam/$relnam.fasta $tmp/$relnam.seq
+			cp ${WRITING_FOLDER}/$relnam/$relnam.fasta $tmp/$relnam.fasta_raw
 			#--> feat_file
 			./Seq_Feat.sh -i $tmp/$relnam.seq
 			mv $relnam.feat_noprof $tmp/$relnam.feat_noprof
@@ -394,7 +401,7 @@ cd $Server_Root
 	
 
 	# ------ remove temporary folder ----- #
-	rm -rf $tmp/
-	rm -f $relnam.fasta
+	#rm -rf $tmp/
+	#rm -f $relnam.fasta
 cd $CurRoot
 

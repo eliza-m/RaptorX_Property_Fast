@@ -20,21 +20,22 @@ if [ $# -lt 1 ];
 then
         usage
 fi
-curdir="$(pwd)"
-
-
 
 # ----- get arguments ----- #
 #-> optional arguments
-out_root="./"   #-> output to current directory
+
+out_root=""		#-> will be changed bellow
 job_id="tmp"    #-> we allow job id here
 coverage=-2     #-> automatic determine the coverage on basis of input sequence length 
 cpu_num=4       #-> use 4 CPUs 
-kill_tmp=1      #-> default: kill temporary root
+kill_tmp=0      #-> default: kill temporary root
+
 #-> required arguments
-input_fasta=""
+input_fasta=""	#-> will be changed bellow
 iteration=3
 uniprot20=uniprot20_2016_02
+
+
 
 #-> parse arguments
 while getopts ":i:n:C:o:j:c:k:d:" opt;
@@ -78,28 +79,30 @@ do
 	esac
 done
 
+fulnam=`basename $input_fasta`
+relnam=${fulnam%.*}
+curdir="$(pwd)"
+
+
+WRITING_FOLDER=${curdir}/tmp/
+out_root=${WRITING_FOLDER}/$relnam/TMP"_"$relnam
+mkdir -p $out_root
+
+# --- create temporary folder --#
+tmp_root=${WRITING_FOLDER}/$relnam/TMP"_"$relnam
+#mkdir -p $tmp_root
+
 
 # ------ check required arguments ------ #
 if [ ! -f "$input_fasta" ]
 then
-	echo "input_fasta $input_fasta not found !!" >&2
+	echo "input_fasta "$input_fasta" not found !!" >&2
 	exit 1
 fi
 
 
-# ------ related path ------ #
-#-> get job id:
-fulnam=`basename $input_fasta`
-relnam=${fulnam%.*}
-
-# --- create temporary folder --#
-tmp_root=$relnam"_"$job_id/
-mkdir -p $out_root
-mkdir -p $tmp_root
-
-
 # ---- verify FASTA file -------- #
-seq_file=$relnam.seq
+seq_file=${tmp_root}/$relnam.seq
 util/Verify_FASTA $input_fasta $seq_file
 
 
@@ -118,8 +121,8 @@ fi
 
 
 # ---- generate A3M file -------- #
-a3m_file=$relnam.a3m
-if [ ! -f "$curdir/$a3m_file" ]
+a3m_file=${tmp_root}/$relnam.a3m
+if [ ! -f "$a3m_file" ]
 then
 	echo "hhblits start with database $uniprot20"
 	HHSUITE=hhsuite
@@ -128,28 +131,29 @@ then
 	then
 		echo "run HHblits with default parameter without -cov "
 		echo "HHblits is : "$(readlink -f $HHSUITE)
-		$HHSUITE/install/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o $relnam.hhr -oa3m $relnam.a3m -n $iteration
+		$HHSUITE/install/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o ${tmp_root}/$relnam.hhr -oa3m ${tmp_root}/$relnam.a3m -n $iteration
 	else
 		echo "run HHblits with -maxfilt 500000 -diff inf -id 99 -cov $coverage"
-		$HHSUITE/install/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o $relnam.hhr -oa3m $relnam.a3m -n $iteration -maxfilt 500000 -diff inf -id 99 -cov $coverage
+		$HHSUITE/install/bin/hhblits -i $seq_file -cpu $cpu_num -d databases/uniprot20/$uniprot20 -o ${tmp_root}/$relnam.hhr -oa3m ${tmp_root}/$relnam.a3m -n $iteration -maxfilt 500000 -diff inf -id 99 -cov $coverage
 	fi
-	mv $relnam.hhr $tmp_root
 	echo "hhblits done"
 fi
 
 # ---- generate TGT file ------ #
-tgt_file=$relnam.tgt
-if [ ! -f "$curdir/$tgt_file" ]
+tgt_file=${tmp_root}/$relnam.tgt
+if [ ! -f "$tgt_file" ]
 then
 	./A3M_To_TGT -i $seq_file -I $a3m_file -o $tgt_file -t $tmp_root
+	echo "After A3M_To_TGT";
 fi
 
 # ---- post process ----- #
-if [ $kill_tmp -eq 1 ]
-then
-	rm -f $tmp_root/$relnam.*
-	rmdir $tmp_root
-fi
-cp $input_fasta $out_root/$relnam.fasta_raw
-mv $seq_file $a3m_file $tgt_file $out_root
+#if [ $kill_tmp -eq 1 ]
+#then
+#	rm -f $tmp_root/$relnam.*
+#	rmdir $tmp_root
+#fi
+
+# cp $input_fasta $out_root/$relnam.fasta_raw
+# mv $seq_file $a3m_file $tgt_file $out_root
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Runnning genDIS.sh"
 if [ $# -ne 2 ]
 then
         echo "Usage: ./DISOPRED <input_mtx> <out_dir> "
@@ -8,7 +9,7 @@ fi
 # $1 the sequence name with suffix .seq
 # $2 out directory
 
-RaptorX_HOME=~/GitBucket/RaptorX_Property_Fast
+RaptorX_HOME=/storage1/eliza/git/LRRpred_raptorpaths/LRRpredictor_v1/RaptorX_Property_Fast
 PSIPREDDIR=$RaptorX_HOME/util/DISOPRED
 INPUTMTX=$1
 DESTDIR=$2
@@ -22,20 +23,22 @@ fi
 
 fulnam=`basename $1`
 bname=${fulnam%.*}
-rootname=R$bname
-cp $INPUTMTX $rootname.mtx
+
+rootname=$DESTDIR/$bname
+#rootname=R$bname
+#cp $INPUTMTX $rootname.mtx
 
 echo Pass1 ...
 echo Pass2 ...
-$PSIPREDDIR/bin/disopred $rootname $rootname.mtx $PSIPREDDIR/data/
+$PSIPREDDIR/bin/disopred $rootname $INPUTMTX $PSIPREDDIR/data/
 
 
 echo "Final output files:" $rootname.diso $rootname.horiz_d
-mv $rootname.diso $DESTDIR/$bname.diso
-mv $rootname.horiz_d $DESTDIR/$bname.horiz_d
+# mv $rootname.diso $DESTDIR/$bname.diso
+# mv $rootname.horiz_d $DESTDIR/$bname.horiz_d
 
 #remove temporary files
-echo Cleaning up ....
+#echo Cleaning up ....
 #-rm -f $rootname.pn $rootname.sn $rootname.aux error.log $rootname.mtx
 #-rm -f $rootname.chk 
-rm -f $rootname.*
+#rm -f $rootname.*

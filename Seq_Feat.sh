@@ -18,7 +18,7 @@ curdir="$(pwd)"
 
 # ----- main directory ---#
 util=bin
-RaptorX_HOME=~/GitBucket/RaptorX_Property_Fast
+RaptorX_HOME=/storage1/eliza/git/LRRpred_raptorpaths/LRRpredictor_v1/RaptorX_Property_Fast
 #-> check directory
 if [ ! -f "$RaptorX_HOME/Seq_Feat.sh" ]
 then
@@ -91,8 +91,9 @@ then
 fi
 
 # ----- pre process ------ #
-cd $RaptorX_HOME
-tmp=tmp"_"$relnam"_"$RANDOM
+cd $RaptorX_HOME/tmp/$relnam
+tmp=tmp"_"$relnam
+
 mkdir -p $tmp/
 rm -f $tmp/$relnam.seq
 if [ $has_fasta -eq 1 ]
