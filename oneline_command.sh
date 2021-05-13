@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exit 0;
+
 if [ $# -lt 1 ]
 then
 	echo "Usage: ./protprop_server.sh <input_fasta> [cpu_number] [PROF_or_NOT] "
